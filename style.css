@@ -1,0 +1,27 @@
+
+    * {
+      box-sizing: border-box;
+
+    }
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background: #ebe8e8;
+    }
+    #grid {
+      display: grid;
+      grid-template-columns: repeat(10, 40px);
+      grid-template-rows: repeat(10, 40px);
+      gap: 2px;
+      background: #444;
+      padding: 2px;
+    }
+    .tile {
+      outline: 3px solid black;
+      width: 40px;
+      height: 40px;
+      background: #bcebae;
+    }
