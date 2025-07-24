@@ -113,7 +113,7 @@ function Animate(path, goal) {
 
     const [i, j] = path[index];
     const tile = getTile(i, j);
-    if (tile) tile.style.backgroundColor = 'blue';
+    if (tile) tile.style.backgroundColor = 'pink';
     if (prev) prev.style.backgroundColor = '#ccc';
 
     prev = tile;
