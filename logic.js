@@ -15,15 +15,27 @@ class MapGrid {
     this.cols = cols;
     this.start = start; // [i, j]
     this.goal = goal;   // [i, j]
-    this.grid = this.generateGrid();
+    this.grid = this.generateAndDrawGrid();
   }
 
-  generateGrid() {
+  generateAndDrawGrid() {
     const grid = [];
+    // shape the grid
+    const gridLayout = document.querySelector("#grid");
+    gridLayout.style.gridTemplateColumns = `repeat(${this.cols}, 1fr)`;
+    gridLayout.style.gridTemplateRows = `repeat(${this.rows}, 1rf)`;
+
+
     for (let i = 0; i < this.rows; i++) {
       const row = [];
       for (let j = 0; j < this.cols; j++) {
         row.push(new Cell(i, j));
+
+        // draw cell : create, class, append
+        const c = document.createElement("div");
+        c.classList.add("tile");
+        gridLayout.appendChild(c);
+        
       }
       grid.push(row);
     }
@@ -94,12 +106,12 @@ function getGridMatrix(tiles, rows, cols) {
 
 
 // ===== Function: Animate =====
-function Animate(path, goal) {
+function Animate(path, map) {
   const tiles = document.querySelectorAll('.tile');
-  const tileMatrix = getGridMatrix(tiles, 10, 10);
+  const tileMatrix = getGridMatrix(tiles, map.rows, map.cols);
   const getTile = (i, j) => tileMatrix[i][j];
 
-  const goalTile = getTile(...goal);
+  const goalTile = getTile(...map.goal);
   if (goalTile) goalTile.style.backgroundColor = 'green';
 
   let prev = null;
@@ -145,7 +157,7 @@ function Animate(path, goal) {
 // }
 
 
-const map = new MapGrid(10, 10, [0, 0], [5, 5]);
+const map = new MapGrid(10, 20, [2, 5], [5, 5]);
 // console.log(map);
 
 const agent = new Agent();
@@ -155,4 +167,4 @@ const agent = new Agent();
 const path = agent.play(map);
 // console.log(path);
 
-Animate(path, map.goal);
+Animate(path, map);

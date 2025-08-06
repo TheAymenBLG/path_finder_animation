@@ -14,15 +14,13 @@
     }
     #grid {
       display: grid;
-      grid-template-columns: repeat(10, 40px);
-      grid-template-rows: repeat(10, 40px);
       gap: 2px;
       background: #444;
       padding: 2px;
     }
     .tile {
       outline: 3px solid black;
-      width: 40px;
-      height: 40px;
+      width: 20px;
+      height: 20px;
       background: #bcebae;
     }
