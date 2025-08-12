@@ -6,6 +6,7 @@ class Cell {
     this.j = j;
     this.visited = false;
   }
+
 }
 
 // ===== Class: Map =====
@@ -15,27 +16,20 @@ class MapGrid {
     this.cols = cols;
     this.start = start; // [i, j]
     this.goal = goal;   // [i, j]
-    this.grid = this.generateAndDrawGrid();
+    this.grid = this.generateGrid();
   }
+  //TODO : set fallback logic for erroneous settings
+  // setStart(){}
+  // setGoal(){}
+  //initializeGrid(){setStart, setGoal, generateGrid}
 
-  generateAndDrawGrid() {
+  generateGrid() {
     const grid = [];
-    // shape the grid
-    const gridLayout = document.querySelector("#grid");
-    gridLayout.style.gridTemplateColumns = `repeat(${this.cols}, 1fr)`;
-    gridLayout.style.gridTemplateRows = `repeat(${this.rows}, 1rf)`;
-
 
     for (let i = 0; i < this.rows; i++) {
       const row = [];
       for (let j = 0; j < this.cols; j++) {
         row.push(new Cell(i, j));
-
-        // draw cell : create, class, append
-        const c = document.createElement("div");
-        c.classList.add("tile");
-        gridLayout.appendChild(c);
-        
       }
       grid.push(row);
     }
@@ -47,12 +41,10 @@ class MapGrid {
   }
 
   getNeighbors(cell) {
-    const dirs = [[0,1],[1,0],[0,-1],[-1,0]];
     const neighbors = [];
-    for (const [di, dj] of dirs) {
-      const ni = cell.i + di;
-      const nj = cell.j + dj;
-      const neighbor = this.getCell(ni, nj);
+    const directions = [[1, 0], [0, 1], [-1, 0], [0, -1]];
+    for (const [di, dj] of directions) {
+      let neighbor = this.getCell(cell.i+di, cell.j+dj);
       if (neighbor && !neighbor.visited) neighbors.push(neighbor);
     }
     return neighbors;
@@ -73,7 +65,7 @@ class Agent {
       if (current.visited) continue;
 
       current.visited = true;
-      path.push([current.i, current.j]);
+      path.push(current);
 
       if (current.i === map.goal[0] && current.j === map.goal[1]) break;
 
@@ -104,6 +96,15 @@ function getGridMatrix(tiles, rows, cols) {
   return grid;
 }
 
+class Renderer {
+  constructor(containerId, model) { }
+  render() {
+
+  }
+  animateCell(position, cellType) {
+
+  }
+}
 
 // ===== Function: Animate =====
 function Animate(path, map) {
@@ -135,29 +136,7 @@ function Animate(path, map) {
 
 
 
-
-// const tiles = document.querySelectorAll('.tile');
-
-// currentIndex = 0;
-// while (currentIndex < tiles.length) {
-
-//     const i = currentIndex;
-
-//     setTimeout(() => {
-//         // console.log(tiles[i])
-
-//         tiles[i].style.backgroundColor = '#aa00aa';
-//     }, i * 50); // delay each one by 50ms
-//     setTimeout(() => {
-//         if (i > 0) tiles[i - 1].style.backgroundColor = '#bcebae';
-//     }, i * 50 + 10);
-
-//     prev = tiles[i];
-//     currentIndex++;
-// }
-
-
-const map = new MapGrid(10, 20, [2, 5], [5, 5]);
+const map = new MapGrid(5, 5, [0, 0], [3, 3]);
 // console.log(map);
 
 const agent = new Agent();
@@ -165,6 +144,6 @@ const agent = new Agent();
 
 
 const path = agent.play(map);
-// console.log(path);
+console.log(path);
 
-Animate(path, map);
+// Animate(path, map);

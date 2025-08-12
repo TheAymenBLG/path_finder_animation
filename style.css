@@ -24,3 +24,9 @@
       height: 20px;
       background: #bcebae;
     }
+    .controls{
+      width: 50%;
+      padding : 3%;
+      display: flex;
+      justify-content: space-between;
+    }

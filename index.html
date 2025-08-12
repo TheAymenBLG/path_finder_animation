@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Agent Pathfinder Grid</title>
   <link rel="stylesheet" href="style.css">
   <script src="logic.js" defer></script>
@@ -10,9 +11,14 @@
 
 
 <body>
+  <h1>DFS Visualizer</h1>
+  <div class="controls">
+    <button type="button">Start</button>
+    <button type="reset">Reset</button>
+    <input type="range" id="speedSlider" min="1" max="100" value="50">
+  </div>
   <div id="grid">
   </div>
 </body>
+
 </html>
-
-
