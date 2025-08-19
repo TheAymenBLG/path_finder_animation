@@ -14,14 +14,15 @@ class MapGrid {
   constructor(rows, cols, start, goal) {
     this.rows = rows;
     this.cols = cols;
-    this.start = start; // [i, j]
-    this.goal = goal;   // [i, j]
+    this.start = start;
+    this.goal = goal;
     this.grid = this.generateGrid();
   }
   //TODO : set fallback logic for erroneous settings
   // setStart(){}
   // setGoal(){}
   //initializeGrid(){setStart, setGoal, generateGrid}
+  // reset()
 
   generateGrid() {
     const grid = [];
@@ -44,56 +45,94 @@ class MapGrid {
     const neighbors = [];
     const directions = [[1, 0], [0, 1], [-1, 0], [0, -1]];
     for (const [di, dj] of directions) {
-      let neighbor = this.getCell(cell.i+di, cell.j+dj);
+      let neighbor = this.getCell(cell.i + di, cell.j + dj);
       if (neighbor && !neighbor.visited) neighbors.push(neighbor);
     }
     return neighbors;
   }
+
+  isGoal(cell) {
+    return cell.i === this.goal[0] && cell.j === this.goal[1]
+  }
+
 }
 
 // ===== Class: Agent =====
 class Agent {
-  play(map) {
-    const path = [];
-    const stack = [];
+  path = [];
+  engine;
+  constructor(grid) {
+    this.grid = grid;
+    this.path.push(grid.getCell(...grid.start))
+    this.engine = new DFSEngine(this);
+  }
 
-    const startCell = map.getCell(...map.start);
-    stack.push(startCell);
+  isFinished(){
+    return this.grid.isGoal(this.path.at(-1));
+  }
 
-    while (stack.length > 0) {
-      const current = stack.pop();
-      if (current.visited) continue;
+  perceive() {
+    // throw new Error("Must implement perceive()");
+  }
 
-      current.visited = true;
-      path.push(current);
-
-      if (current.i === map.goal[0] && current.j === map.goal[1]) break;
-
-      const neighbors = map.getNeighbors(current);
-      for (const neighbor of neighbors) {
-        stack.push(neighbor);
-      }
+  act() {
+    // throw new Error("Must implement act()");
+    let nextStep= this.engine.findNextAction();
+    if (nextStep){
+    this.path.push(nextStep);
     }
+    return nextStep;
+  }
 
-    return path;
+
+}
+
+class Engine {
+  constructor(agent) {
+    this.agent = agent;
+  }
+
+  findNextAction() {
+    throw new Error("Must implement findNextAction");
   }
 }
 
-function getGridMatrix(tiles, rows, cols) {
-  const grid = [];
+class DFSEngine extends Engine {
 
+  visited = new Set();
+  stack = [];
 
-  for (let i = 0; i < rows; i++) {
-
-    const row = [];
-    for (let j = 0; j < cols; j++) {
-
-      row.push(tiles[i * cols + j]); // linear index → 2D
-    }
-    grid.push(row);
+  constructor(agent) {
+    super(agent)
+    this.stack.push(agent.path[0]);
   }
 
-  return grid;
+
+  findNextAction() {
+    //return next step, or null if goal reached or no cells to visit
+
+    if (this.stack.length > 0 && !this.agent.isFinished()) {
+      // console.log(`stack length : ${this.stack.length}`)
+      let current = this.stack.at(-1);
+      while (this.visited.has(current)) {
+        current = this.stack.pop();
+      }
+      // current = this.stack.pop();
+
+
+      this.visited.add(current);
+
+      const neighbors = agent.grid.getNeighbors(current);
+      console.log(neighbors)
+
+      for (const neighbor of neighbors) {
+        this.stack.push(neighbor);
+      }
+
+      return current;
+    }
+    return null;
+  }
 }
 
 class Renderer {
@@ -102,7 +141,6 @@ class Renderer {
 
   }
   animateCell(position, cellType) {
-
   }
 }
 
@@ -134,16 +172,32 @@ function Animate(path, map) {
   }, 100);
 }
 
+class Controller {
+  constructor(agent, grid) {
+    this.agent = agent;
+    this.grid = grid;
+    // this.renderer = renderer;
+  }
+
+  play() {
+    const id = setInterval(() => {
+      let step = agent.act();
+      if (step) {
+        console.log(step)
+      } else {
+        clearInterval(id);
+      }
+    }, 1000);
+
+  }
+}
 
 
-const map = new MapGrid(5, 5, [0, 0], [3, 3]);
+const grid = new MapGrid(5, 5, [3, 0], [0, 0]);
 // console.log(map);
 
-const agent = new Agent();
-// console.log(agent);
+const agent = new Agent(grid);
+console.log(`agent is : ${agent}`);
 
-
-const path = agent.play(map);
-console.log(path);
-
-// Animate(path, map);
+const controller = new Controller(agent, grid)
+controller.play();
