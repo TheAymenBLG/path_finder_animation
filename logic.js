@@ -67,7 +67,7 @@ class Agent {
     this.engine = new DFSEngine(this);
   }
 
-  isFinished(){
+  isFinished() {
     return this.grid.isGoal(this.path.at(-1));
   }
 
@@ -77,9 +77,9 @@ class Agent {
 
   act() {
     // throw new Error("Must implement act()");
-    let nextStep= this.engine.findNextAction();
-    if (nextStep){
-    this.path.push(nextStep);
+    let nextStep = this.engine.findNextAction();
+    if (nextStep) {
+      this.path.push(nextStep);
     }
     return nextStep;
   }
@@ -136,11 +136,29 @@ class DFSEngine extends Engine {
 }
 
 class Renderer {
-  constructor(containerId, model) { }
-  render() {
+  constructor(containerId, agent) {
+    this.containerId = containerId;
+    this.grid = agent.grid;
+    this.agent = agent;
+  }
+  renderGrid() {
+    this.containerId.style.gridTemplateRows = `repeat(${this.grid.rows}, 1fr)`;
+    this.containerId.style.gridTemplateColumns = `repeat(${this.grid.cols}, 1fr)`;
+
+    for (let i = 0; i < this.grid.rows; i++) {
+      for (let j = 0; j < this.grid.cols; j++) {
+        const cell = document.createElement("div");
+        this.containerId.appendChild(cell);
+        cell.classList.add(`tile`);
+        cell.classList.add(`row${i}`);
+        cell.classList.add(`column${j}`);
+      }
+    }
 
   }
-  animateCell(position, cellType) {
+
+  render() {
+
   }
 }
 
@@ -173,15 +191,17 @@ function Animate(path, map) {
 }
 
 class Controller {
-  constructor(agent, grid) {
+  constructor(agent, renderer) {
+    this.renderer = renderer;
     this.agent = agent;
-    this.grid = grid;
+    this.grid = agent.grid;
     // this.renderer = renderer;
   }
 
   play() {
+    this.renderer.renderGrid();
     const id = setInterval(() => {
-      let step = agent.act();
+      let step = this.agent.act();
       if (step) {
         console.log(step)
       } else {
@@ -193,11 +213,12 @@ class Controller {
 }
 
 
-const grid = new MapGrid(5, 5, [3, 0], [0, 0]);
-// console.log(map);
+const grid = new MapGrid(5, 5, [3, 0], [3, 3]);
 
 const agent = new Agent(grid);
-console.log(`agent is : ${agent}`);
+// console.log(`agent is : ${agent.toString()}`);
 
-const controller = new Controller(agent, grid)
+const renderer = new Renderer(document.querySelector("#grid"), agent);
+
+const controller = new Controller(agent, renderer)
 controller.play();
