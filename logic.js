@@ -16,6 +16,7 @@ class MapGrid {
     this.cols = cols;
     this.start = start;
     this.goal = goal;
+    this.walls = this.#generateWallsCoordinates(rows, cols);
     this.grid = this.generateGrid();
   }
   //TODO : set fallback logic for erroneous settings
@@ -37,14 +38,52 @@ class MapGrid {
     return grid;
   }
 
+  #generateWallsCoordinates(rows, cols, fraction = 0.1) {
+    if (fraction < 0 || fraction > 1) {
+      throw "Fraction must be between 0 and 1.";
+    }
+
+    const cellCount = rows * cols;
+
+    const wallCount = Math.floor(fraction * cellCount);
+
+    const wallsSet = new Set();
+
+    while (wallsSet.size < wallCount) {
+      const x = Math.floor(Math.random() * rows);
+      const y = Math.floor(Math.random() * cols);
+
+      if (
+        (this.start && x === this.start[0] && y === this.start[1]) ||
+        (this.goal && x === this.goal[0] && y === this.goal[1])
+      ) {
+        continue;
+      }
+
+      const key = `${x},${y}`;
+      wallsSet.add(key);
+    }
+
+    const walls = Array.from(wallsSet).map(key => {
+      const parts = key.split(',');
+      return [parseInt(parts[0], 10), parseInt(parts[1], 10)];
+    });
+
+    return walls;
+  }
+  
+
   #getCell(i, j) {
     return (this.grid[i] && this.grid[i][j]) || null;
   }
-  getStartCell(){
+  getStartCell() {
     return grid.#getCell(...grid.start);
   }
-  getGoalCell(){
-
+  getGoalCell() {
+    return grid.#getCell(...grid.goal);
+  }
+  getWallCells(){
+    return Array.from(this.walls).map(value => this.#getCell(...value));
   }
 
   getNeighbors(cell) {
@@ -107,10 +146,14 @@ class DFSEngine extends Engine {
 
   visited = new Set();
   stack = [];
+  walls = null;
+  
+
 
   constructor(agent) {
     super(agent)
     this.stack.push(agent.path[0]);
+    this.walls = this.agent.grid.getWallCells();
   }
 
 
@@ -131,6 +174,9 @@ class DFSEngine extends Engine {
       const neighbors = agent.grid.getNeighbors(current);
 
       for (const neighbor of neighbors) {
+        if(this.walls.includes(neighbor)){
+          continue;
+        }
         this.stack.push(neighbor);
       }
 
@@ -147,12 +193,19 @@ class Renderer {
     this.agent = agent;
   }
 
+
+
   getDOMcell(row, column) {
     return document.querySelector(`.row${row}.column${column}`)
   }
   getDOMgoalCell() {
     return this.getDOMcell(...this.grid.goal)
   }
+  getDOMwalls(){
+    return Array.from(this.grid.walls).map(value => this.getDOMcell(...value));
+
+  }
+
 
   renderGrid() {
     this.containerId.style.gridTemplateRows = `repeat(${this.grid.rows}, 1fr)`;
@@ -165,10 +218,15 @@ class Renderer {
         cell.classList.add(`tile`);
         cell.classList.add(`row${i}`);
         cell.classList.add(`column${j}`);
+
+
+
       }
     }
     this.getDOMgoalCell().style.backgroundColor = "green";
-
+    for (const wallCell of this.getDOMwalls()) {
+      wallCell.style.backgroundColor = 'black';
+    }
   }
 
   updatePath() {
