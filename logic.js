@@ -38,7 +38,7 @@ class MapGrid {
     return grid;
   }
 
-  #generateWallsCoordinates(rows, cols, fraction = 0.1) {
+  #generateWallsCoordinates(rows, cols, fraction = 0.2) {
     if (fraction < 0 || fraction > 1) {
       throw "Fraction must be between 0 and 1.";
     }
@@ -145,14 +145,14 @@ class Engine {
 class DFSEngine extends Engine {
 
   visited = new Set();
-  stack = [];
+  toVisitStack = [];
   walls = null;
   
 
 
   constructor(agent) {
     super(agent)
-    this.stack.push(agent.path[0]);
+    this.toVisitStack.push(agent.path[0]);
     this.walls = this.agent.grid.getWallCells();
   }
 
@@ -160,11 +160,11 @@ class DFSEngine extends Engine {
   findNextAction() {
     //return next step, or null if goal reached or no cells to visit
 
-    if (this.stack.length > 0 && !this.agent.isFinished()) {
+    if (this.toVisitStack.length > 0 && !this.agent.isFinished()) {
       // console.log(`stack length : ${this.stack.length}`)
-      let current = this.stack.at(-1);
+      let current = this.toVisitStack.at(-1);
       while (this.visited.has(current)) {
-        current = this.stack.pop();
+        current = this.toVisitStack.pop();
       }
       // current = this.stack.pop();
 
@@ -177,7 +177,7 @@ class DFSEngine extends Engine {
         if(this.walls.includes(neighbor)){
           continue;
         }
-        this.stack.push(neighbor);
+        this.toVisitStack.push(neighbor);
       }
 
       return current;
@@ -218,9 +218,6 @@ class Renderer {
         cell.classList.add(`tile`);
         cell.classList.add(`row${i}`);
         cell.classList.add(`column${j}`);
-
-
-
       }
     }
     this.getDOMgoalCell().style.backgroundColor = "green";
@@ -230,9 +227,12 @@ class Renderer {
   }
 
   updatePath() {
-    const lastCellVisited = this.agent.path.at(-1);
-    const lastDomCellVisited = this.getDOMcell(lastCellVisited.i, lastCellVisited.j)
-    lastDomCellVisited.style.backgroundColor = "blue";
+    const currentCell = this.agent.path.at(-1);
+    const lastCellVisited = this.agent.path.at(-2);
+    const currentDOMcell = this.getDOMcell(currentCell.i, currentCell.j);
+    const lastDOMcellVisited = this.getDOMcell(lastCellVisited.i, lastCellVisited.j);
+    currentDOMcell.style.backgroundColor = "blue";
+    lastDOMcellVisited.style.backgroundColor = "lightBlue";
   }
 }
 
