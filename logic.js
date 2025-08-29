@@ -37,15 +37,21 @@ class MapGrid {
     return grid;
   }
 
-  getCell(i, j) {
+  #getCell(i, j) {
     return (this.grid[i] && this.grid[i][j]) || null;
+  }
+  getStartCell(){
+    return grid.#getCell(...grid.start);
+  }
+  getGoalCell(){
+
   }
 
   getNeighbors(cell) {
     const neighbors = [];
     const directions = [[1, 0], [0, 1], [-1, 0], [0, -1]];
     for (const [di, dj] of directions) {
-      let neighbor = this.getCell(cell.i + di, cell.j + dj);
+      let neighbor = this.#getCell(cell.i + di, cell.j + dj);
       if (neighbor && !neighbor.visited) neighbors.push(neighbor);
     }
     return neighbors;
@@ -63,7 +69,7 @@ class Agent {
   engine;
   constructor(grid) {
     this.grid = grid;
-    this.path.push(grid.getCell(...grid.start))
+    this.path.push(grid.getStartCell())
     this.engine = new DFSEngine(this);
   }
 
@@ -123,7 +129,6 @@ class DFSEngine extends Engine {
       this.visited.add(current);
 
       const neighbors = agent.grid.getNeighbors(current);
-      console.log(neighbors)
 
       for (const neighbor of neighbors) {
         this.stack.push(neighbor);
@@ -141,6 +146,14 @@ class Renderer {
     this.grid = agent.grid;
     this.agent = agent;
   }
+
+  getDOMcell(row, column) {
+    return document.querySelector(`.row${row}.column${column}`)
+  }
+  getDOMgoalCell() {
+    return this.getDOMcell(...this.grid.goal)
+  }
+
   renderGrid() {
     this.containerId.style.gridTemplateRows = `repeat(${this.grid.rows}, 1fr)`;
     this.containerId.style.gridTemplateColumns = `repeat(${this.grid.cols}, 1fr)`;
@@ -154,11 +167,14 @@ class Renderer {
         cell.classList.add(`column${j}`);
       }
     }
+    this.getDOMgoalCell().style.backgroundColor = "green";
 
   }
 
-  render() {
-
+  updatePath() {
+    const lastCellVisited = this.agent.path.at(-1);
+    const lastDomCellVisited = this.getDOMcell(lastCellVisited.i, lastCellVisited.j)
+    lastDomCellVisited.style.backgroundColor = "blue";
   }
 }
 
@@ -202,18 +218,19 @@ class Controller {
     this.renderer.renderGrid();
     const id = setInterval(() => {
       let step = this.agent.act();
+      this.renderer.updatePath();
       if (step) {
         console.log(step)
       } else {
         clearInterval(id);
       }
-    }, 1000);
+    }, 200);
 
   }
 }
 
 
-const grid = new MapGrid(5, 5, [3, 0], [3, 3]);
+const grid = new MapGrid(5, 10, [3, 0], [3, 3]);
 
 const agent = new Agent(grid);
 // console.log(`agent is : ${agent.toString()}`);
